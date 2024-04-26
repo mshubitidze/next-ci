@@ -1,5 +1,13 @@
 name: Continuous Integration
 
+# this is trigger CI on push and PR for main branch only
+# on:
+#   push:
+#     branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+# this is trigger CI on all kinds of branches and PRs
 on:
   push:
   pull_request:
@@ -8,23 +16,20 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-  steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Fetch all history for all branches and tags
+      - name: Use Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "20.9.0"
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: 20
+      - name: Install dependencies
+        run: npm install
 
-    - uses: pnpm/action-setup@v3
-      name: Install pnpm
-      with:
-        version: 8
-        run_install: true
+      - name: Run lint
+        run: npm run lint
 
-    - name: Run lint
-      run: pnpm run lint
-
-    - name: Run type check
-      run: pnpm run typecheck
+      - name: Run format check
+        run: npm run format
